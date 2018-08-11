@@ -10,6 +10,14 @@ Display::Display(void){
   pinMode(DATA_PIN, OUTPUT);
 }
 
+void Display::on(){
+  update(255);
+}
+
+void Display::off(){
+  update(0);
+}
+
 
 void Display::update(byte number_to_show){
   digitalWrite(LATCH_PIN, LOW);

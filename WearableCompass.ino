@@ -77,10 +77,19 @@ void displayCalStatus(void)
   Serial.println(mag, DEC);
 }
 
+void waitForCalibration(void){
+  uint8_t system, gyro, accel, mag;
+  system = gyro = accel = mag = 0;
+  bno.getCalibration(&system, &gyro, &accel, &mag);
+  while(system < 3 && mag < 3){};
+}
+
+void setup(){
+
 void setup(){
   Serial.begin(9600);
   Serial.println("Wearable Compass"); Serial.println("");
-
+  ledMatrix.off();
   /* Initialise the sensor */
   if(!bno.begin(Adafruit_BNO055::OPERATION_MODE_COMPASS))
   {
@@ -88,12 +97,13 @@ void setup(){
     Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
     while(1);
   }
-
-  delay(1000);
-
+  ledMatrix.on();
+  waitForCalibration();
+  ledMatrix.off();
   displaySensorDetails();
   displayTemperature();
   displayCalStatus();
+
 
   bno.setExtCrystalUse(true);
 }
