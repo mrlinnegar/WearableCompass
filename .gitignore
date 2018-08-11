@@ -34,3 +34,8 @@
 .piolibdeps/
 lib/
 test/test
+.pioenvs
+.piolibdeps
+.clang_complete
+.gcc-flags.json
+.travis.yml
