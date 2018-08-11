@@ -39,3 +39,5 @@ test/test
 .clang_complete
 .gcc-flags.json
 .travis.yml
+
+.DS_Store
