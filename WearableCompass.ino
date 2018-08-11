@@ -3,11 +3,12 @@
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
 #include "Display.h";
+#include <math.h>
 
 /* Set the delay between fresh samples */
 #define BNO055_SAMPLERATE_DELAY_MS (100)
 
-/* 
+/*
    Connections
    ===========
    BNO055
@@ -40,7 +41,7 @@ void displaySensorDetails(void)
 
 void displayTemperature(void)
 {
-  
+
   /* Display the current temperature */
   int8_t temp = bno.getTemp();
   Serial.print("Current Temperature: ");
@@ -57,14 +58,14 @@ void displayCalStatus(void)
   uint8_t system, gyro, accel, mag;
   system = gyro = accel = mag = 0;
   bno.getCalibration(&system, &gyro, &accel, &mag);
- 
+
   /* The data should be ignored until the system calibration is > 0 */
   Serial.print("\t");
   if (!system)
   {
     Serial.print("! ");
   }
- 
+
   /* Display the individual values */
   Serial.print("Sys:");
   Serial.print(system, DEC);
@@ -75,8 +76,8 @@ void displayCalStatus(void)
   Serial.print(" M:");
   Serial.println(mag, DEC);
 }
-void setup(){
 
+void setup(){
   Serial.begin(9600);
   Serial.println("Wearable Compass"); Serial.println("");
 
@@ -89,19 +90,55 @@ void setup(){
   }
 
   delay(1000);
-  
+
   displaySensorDetails();
   displayTemperature();
   displayCalStatus();
- 
+
   bno.setExtCrystalUse(true);
-  ledMatrix.update(64);
 }
+
+// N = 338 to 22 = 22
+// NE = 23 to 67 = 67
+// E = 68 to 112 = 112
+// SE = 113 to 157 = 157
+// S = 158 to 212 = 212
+// SW = 213 to 247 = 247
+// W = 248 to 292 = 292
+// NW = 293 to 337 = 337
+
+// N 1 - NE 2 - E 4 - SE 8 - S 16 - SW 32 - W 64 - NW 128
+
+
+int RANGE = 22;
+
+int directionToInteger(double direction) {
+  if((direction > 360 - RANGE || direction <= 0 + RANGE) && (direction > 0)) {
+    return 1;
+  } else if(direction >= 45 - RANGE && direction < 45 + RANGE) {
+    return 2;
+  } else if(direction >= 90 - RANGE && direction < 90 + RANGE) {
+    return 4;
+  } else if(direction >= 135 - RANGE && direction < 135 + RANGE) {
+    return 8;
+  } else if(direction >= 180 - RANGE && direction < 180 + RANGE) {
+    return 16;
+  } else if(direction >= 225 - RANGE && direction < 225 + RANGE) {
+    return 32;
+  } else if(direction >= 270 - RANGE && direction < 270 + RANGE) {
+    return 64;
+  } else if(direction >= 315 - RANGE && direction < 315 + RANGE) {
+    return 128;
+  } else {
+    return 0;
+  }
+}
+
 void loop(){
   sensors_event_t event;                   // Read 9DOF Sensor
   bno.getEvent(&event);
-  displayCalStatus();
-  Serial.println(event.orientation.x, 4);
+  Serial.print("Direction integer: ");
+  Serial.println(directionToInteger(event.orientation.x), DEC);
+  // displayCalStatus();
   delay(BNO055_SAMPLERATE_DELAY_MS);
 }
-
