@@ -79,12 +79,24 @@ void displayCalStatus(void)
 
 void waitForCalibration(void){
   uint8_t system, gyro, accel, mag;
-  system = gyro = accel = mag = 0;
-  bno.getCalibration(&system, &gyro, &accel, &mag);
-  while(system < 3 && mag < 3){};
-}
 
-void setup(){
+  while(system < 3 || mag < 3){
+    system = gyro = accel = mag = 0;
+    bno.getCalibration(&system, &gyro, &accel, &mag);  
+
+    Serial.print("Sys:");
+    Serial.print(system, DEC);
+    Serial.print(" G:");
+    Serial.print(gyro, DEC);
+    Serial.print(" A:");
+    Serial.print(accel , DEC);
+    Serial.print(" M:");
+    Serial.println(mag, DEC);
+  
+    delay(100);
+    
+  };
+}
 
 void setup(){
   Serial.begin(9600);
@@ -148,7 +160,6 @@ void loop(){
   sensors_event_t event;                   // Read 9DOF Sensor
   bno.getEvent(&event);
   Serial.print("Direction integer: ");
-  Serial.println(directionToInteger(event.orientation.x), DEC);
-  // displayCalStatus();
+  ledMatrix.update(directionToInteger(event.orientation.x));
   delay(BNO055_SAMPLERATE_DELAY_MS);
 }
