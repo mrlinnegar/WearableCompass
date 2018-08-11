@@ -79,6 +79,27 @@ void displayCalStatus(void)
   Serial.println(mag, DEC);
 }
 
+void waitForCalibration(void){
+  uint8_t system, gyro, accel, mag;
+
+  while(system < 3 || mag < 3){
+    system = gyro = accel = mag = 0;
+    bno.getCalibration(&system, &gyro, &accel, &mag);
+
+    Serial.print("Sys:");
+    Serial.print(system, DEC);
+    Serial.print(" G:");
+    Serial.print(gyro, DEC);
+    Serial.print(" A:");
+    Serial.print(accel , DEC);
+    Serial.print(" M:");
+    Serial.println(mag, DEC);
+
+    delay(100);
+
+  };
+}
+
 void setup(){
   Serial.begin(9600);
   Serial.println("Wearable Compass"); Serial.println("");
@@ -91,7 +112,9 @@ void setup(){
     while(1);
   }
 
-  delay(1000);
+  ledMatrix.on();
+  waitForCalibration();
+  ledMatrix.off();
 
   displaySensorDetails();
   displayTemperature();
@@ -105,7 +128,7 @@ void loop(){
   sensors_event_t event;                   // Read 9DOF Sensor
   bno.getEvent(&event);
   Serial.print("Direction integer: ");
-  Serial.println(direction.directionToInteger(event.orientation.x), DEC);
+  ledMatrix.update(direction.directionToInteger(event.orientation.x));
   // displayCalStatus();
   delay(BNO055_SAMPLERATE_DELAY_MS);
 }
