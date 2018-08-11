@@ -6,12 +6,12 @@
 #include <math.h>
 
 /* Set the delay between fresh samples */
-#define BNO055_SAMPLERATE_DELAY_MS (100)
+#define BNO055_SAMPLERATE_DELAY_MS  100
 
 Adafruit_BNO055 bno = Adafruit_BNO055();
 Display ledMatrix = Display();
 Direction direction = Direction();
-
+unsigned long last_update = 0;
 
 void displayCalStatus(void)
 {
@@ -55,8 +55,8 @@ void waitForCalibration(void){
     Serial.print(accel , DEC);
     Serial.print(" M:");
     Serial.println(mag, DEC);
-
-    delay(100);
+    ledMatrix.update(255);
+    ledMatrix.display();
   };
 }
 
@@ -81,9 +81,11 @@ void setup(){
 
 
 void loop(){
-  sensors_event_t event;                   // Read 9DOF Sensor
-  bno.getEvent(&event);
-  Serial.print("Direction integer: ");
-  ledMatrix.update(direction.directionToInteger(event.orientation.x));
-  delay(BNO055_SAMPLERATE_DELAY_MS);
+  if(last_update + BNO055_SAMPLERATE_DELAY_MS <  millis()){
+    sensors_event_t event;                   // Read 9DOF Sensor
+    bno.getEvent(&event);
+    ledMatrix.update(direction.directionToInteger(event.orientation.x));
+    last_update = millis();
+  }
+  ledMatrix.display();
 }

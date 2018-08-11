@@ -9,11 +9,13 @@ class Display {
   void on();
   void off();
   void update(byte number_to_show);
+  void display();
+  void setBrightness(byte brightness);
 
  private:
-
-   
-
-   
+  byte number_to_show;
+  byte brightness;
+  unsigned long last_update;
+  boolean state;
 };
 #endif
