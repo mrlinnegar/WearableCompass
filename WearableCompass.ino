@@ -2,6 +2,7 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
+#include "Display.h";
 
 /* Set the delay between fresh samples */
 #define BNO055_SAMPLERATE_DELAY_MS (100)
@@ -17,7 +18,7 @@
 */
 
 Adafruit_BNO055 bno = Adafruit_BNO055();
-
+Display ledMatrix = Display();
 imu::Vector<3> vector;
 
 
@@ -94,7 +95,7 @@ void setup(){
   displayCalStatus();
  
   bno.setExtCrystalUse(true);
-
+  ledMatrix.update(64);
 }
 void loop(){
   sensors_event_t event;                   // Read 9DOF Sensor
