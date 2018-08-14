@@ -1,5 +1,6 @@
 #include "Display.h"
 #include "Arduino.h"
+#include <Easing.h>
 #define  LATCH_PIN 8
 #define  CLOCK_PIN 12
 #define  DATA_PIN 11
@@ -23,7 +24,7 @@ void Display::off(){
 }
 
 void Display::setBrightness(byte brightness){
-  analogWrite(OUTPUt_ENABLE, 255-brightness);
+  analogWrite(OUTPUt_ENABLE, brightness );
 }
 
 void Display::update(byte number){
@@ -34,14 +35,7 @@ void Display::update(byte number){
 }
 
 void Display::display(){
-  if(Display::last_update + 10  < millis()){
-    Display::brightness--;
-    if(Display::brightness <= 0){
-      Display::brightness = 255;
-    }
-    setBrightness(Display::brightness);
-    Display::last_update = millis();
-  }
+  setBrightness((int) Easing::easeInOutQuart(millis() % 1000, 0.0, 255.0, 1000));
   digitalWrite(LATCH_PIN, LOW);
   shiftOut(DATA_PIN, CLOCK_PIN, MSBFIRST, Display::number_to_show);
   digitalWrite(LATCH_PIN, HIGH);

@@ -1,6 +1,6 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
-
+#include <Easing.h>
 #include "Arduino.h"
 
 class Display {
