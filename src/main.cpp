@@ -40,24 +40,18 @@ void displayCalStatus(void)
   Serial.println(mag, DEC);
 }
 
-void waitForCalibration(void){
+boolean isCalibrated(void){
   uint8_t system, gyro, accel, mag;
+  system = gyro = accel = mag = 0;
+  bno.getCalibration(&system, &gyro, &accel, &mag);
+  return (system == 3 && mag == 3);
+}
 
-  while(system < 3 || mag < 3){
-    system = gyro = accel = mag = 0;
-    bno.getCalibration(&system, &gyro, &accel, &mag);
-
-    Serial.print("Sys:");
-    Serial.print(system, DEC);
-    Serial.print(" G:");
-    Serial.print(gyro, DEC);
-    Serial.print(" A:");
-    Serial.print(accel , DEC);
-    Serial.print(" M:");
-    Serial.println(mag, DEC);
-    ledMatrix.update(255);
-    ledMatrix.display();
-  };
+void waitForCalibration(void){
+  ledMatrix.update(255);
+  ledMatrix.display();
+  digitalWrite(13, HIGH);
+  while(!isCalibrated()){};
 }
 
 void setup(){
@@ -71,7 +65,7 @@ void setup(){
     Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
     while(1);
   }
-
+  pinMode(13, OUTPUT);
   ledMatrix.on();
   waitForCalibration();
   ledMatrix.off();
@@ -84,6 +78,7 @@ void loop(){
   if(last_update + BNO055_SAMPLERATE_DELAY_MS <  millis()){
     sensors_event_t event;                   // Read 9DOF Sensor
     bno.getEvent(&event);
+    digitalWrite(13, !isCalibrated());
     ledMatrix.update(direction.directionToInteger(event.orientation.x));
     last_update = millis();
   }
